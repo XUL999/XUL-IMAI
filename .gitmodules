@@ -1,0 +1,3 @@
+[submodule ".gitee/ISSUE_TEMPLATE"]
+	path = .gitee/ISSUE_TEMPLATE
+	url  = https://gitee.com/tsinghua-open/imaiwork

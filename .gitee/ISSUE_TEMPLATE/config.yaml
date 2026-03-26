@@ -1,0 +1,84 @@
+name: 需求提交
+description: 向项目提交功能需求或改进建议
+title: "[需求]: "
+labels: ["需求"]
+body:
+  - type: dropdown
+    id: requirement-type
+    attributes:
+      label: 需求分类
+      description: 请选择需求类型
+      options:
+        - 功能需求
+        - 性能优化
+        - 用户体验改进
+        - 接口/API需求
+        - 其他
+    validations:
+      required: true
+
+  - type: textarea
+    id: requirement-description
+    attributes:
+      label: 需求描述
+      description: 清晰、简洁地描述您的需求内容,说明在什么场景下需要这个功能,遇到了什么问题
+      placeholder: |
+        例如:
+        - 希望增加"批量导入"功能,可以一次性导入 1000 条数据
+        - 客户有大量历史数据需要导入系统
+        - 目前只能手动逐条添加,效率太低
+        - 每次导入需要花费 2-3 小时
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-solution
+    attributes:
+      label: 期望的解决方案
+      description: 描述您期望的实现方式或功能表现(可选)
+      placeholder: |
+        例如:
+        - 支持 Excel/CSV 文件导入
+        - 提供导入模板下载
+        - 导入前进行数据校验
+        - 显示导入进度条
+    validations:
+      required: false
+
+  - type: textarea
+    id: alternative-solutions
+    attributes:
+      label: 当前替代方案
+      description: 您是否考虑过其他解决方案?目前是如何处理的?
+      placeholder: |
+        例如:
+        - 目前通过 API 接口手动调用导入
+        - 考虑过使用第三方工具,但不够便捷
+    validations:
+      required: false
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 优先级评估
+      description: 您认为这个需求的紧急程度如何?
+      options:
+        - 高 - 急需,影响核心业务
+        - 中 - 重要,但可以等待
+        - 低 - 锦上添花,不着急
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: 补充信息
+      description: 其他相关信息、截图、参考资料等
+      placeholder: |
+        - 可以添加截图、原型图
+        - 可以提供竞品参考
+        - 可以附上相关文档链接
+    validations:
+      required: false
+
+

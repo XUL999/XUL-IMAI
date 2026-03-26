@@ -1,0 +1,454 @@
+<template>
+    <div class="upload">
+        <el-upload
+            v-model:file-list="fileList"
+            class="w-[inherit] upload-wrap"
+            ref="uploadRefs"
+            :drag="drag"
+            :action="action"
+            :multiple="multiple"
+            :limit="limit"
+            :disabled="disabled"
+            :show-file-list="showFileList"
+            :list-type="listType"
+            :headers="headers"
+            :data="data"
+            :before-upload="beforeUpload"
+            :on-progress="handleProgress"
+            :on-success="handleSuccess"
+            :on-exceed="handleExceed"
+            :on-error="handleError"
+            :on-remove="handleRemove"
+            :accept="getAccept">
+            <slot></slot>
+        </el-upload>
+        <progress-dialog
+            v-if="showProgress && visible"
+            ref="progressDialogRef"
+            :show-confirm-button="false"
+            :percentage="fileList.map((item) => item)"
+            @close="handleClose" />
+    </div>
+</template>
+
+<script lang="ts">
+import { useUserStore } from "@/stores/user";
+import { getApiPrefix, getApiUrl, getVersion } from "@/utils/env";
+import feedback from "@/utils/feedback";
+import { genFileId, type ElUpload, type UploadRawFile, type UploadProps } from "element-plus";
+import { RequestCodeEnum } from "@/enums/requestEnums";
+import ProgressDialog from "@/components/progress-dialog/index.vue";
+export default defineComponent({
+    components: {},
+    props: {
+        action: {
+            type: String,
+            default: "",
+        },
+        // 上传文件类型
+        type: {
+            type: String,
+            default: "image",
+        },
+        // 是否拖拽上传
+        drag: {
+            type: Boolean,
+            default: false,
+        },
+        // 是否支持多选
+        multiple: {
+            type: Boolean,
+            default: true,
+        },
+        // 多选时最多选择几条
+        limit: {
+            type: Number,
+            default: 10,
+        },
+        // 上传时的额外参数
+        data: {
+            type: Object,
+            default: () => ({}),
+        },
+        // 是否显示上传进度
+        showProgress: {
+            type: Boolean,
+            default: false,
+        },
+        disabled: {
+            type: Boolean,
+            default: false,
+        },
+        listType: {
+            type: String as PropType<"text" | "picture" | "picture-card">,
+            default: "picture",
+        },
+        showFileList: {
+            type: Boolean,
+            default: true,
+        },
+        accept: {
+            type: String,
+            default: "",
+        },
+        maxSize: {
+            type: Number,
+            default: 9999, // MB
+        },
+        minSize: {
+            type: Number,
+            default: 0, // MB
+        },
+        ratioSize: {
+            type: Array as unknown as PropType<[number, number]>,
+            default: () => [0, 0],
+        },
+        // 图片分辨率
+        imageResolution: {
+            type: Array as unknown as PropType<[number, number]>, // 0: width, 1: height
+            default: () => [99999, 99999],
+        },
+        // 视频分辨率
+        videoMaxWidth: {
+            type: Number,
+            default: 99999,
+        },
+        videoMinWidth: {
+            type: Number,
+            default: 1,
+        },
+        videoMaxHeight: {
+            type: Number,
+            default: 99999,
+        },
+        videoMinHeight: {
+            type: Number,
+            default: 1,
+        },
+        // 视频时长
+        minDuration: {
+            type: Number,
+            default: 0,
+        },
+        maxDuration: {
+            type: Number,
+            default: 999999,
+        },
+    },
+    emits: ["change", "error", "remove", "success", "on-progress"],
+    setup(props, { emit, expose }) {
+        const userStore = useUserStore();
+        const uploadRefs = shallowRef<InstanceType<typeof ElUpload>>();
+        const progressDialogRef = shallowRef<InstanceType<typeof ProgressDialog>>();
+        const action = ref(props.action || `${getApiUrl()}${getApiPrefix()}/upload/${props.type}`);
+        const headers = computed(() => ({
+            token: userStore.token,
+            version: getVersion(),
+        }));
+        const visible = ref(false);
+        const fileList = ref<any[]>([]);
+
+        const beforeUpload: UploadProps["beforeUpload"] = async (rawFile) => {
+            const {
+                type,
+                ratioSize,
+                imageResolution,
+                videoMaxWidth,
+                videoMinWidth,
+                videoMaxHeight,
+                videoMinHeight,
+                minDuration,
+                maxDuration,
+                minSize,
+                maxSize,
+            } = props;
+            const sizeInMB = rawFile.size / 1024 / 1024;
+
+            // 文件大小校验
+            const validateFileSize = () => {
+                if (sizeInMB < minSize) {
+                    feedback.msgError(`上传文件大小不能小于 ${minSize} MB`);
+                    return false;
+                }
+                if (sizeInMB > maxSize) {
+                    feedback.msgError(`上传文件大小不能大于 ${maxSize} MB`);
+                    return false;
+                }
+                return true;
+            };
+
+            // 图片尺寸校验
+            const validateImageSize = async () => {
+                return new Promise<boolean>((resolve) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const isResolutionValid = img.height <= imageResolution[0] && img.width <= imageResolution[1];
+                        // 判断图片比例是否符合要求
+                        const isRatioValid = checkAspectRatio(img.width, img.height);
+                        // 判断图片分辨率是否符合要求
+                        if (!isResolutionValid) {
+                            feedback.msgError(`上传图片分辨率不能大于 ${imageResolution[0]}*${imageResolution[1]}`);
+                        } else if (!isRatioValid) {
+                            feedback.msgError(`上传图片尺寸不能大于 ${ratioSize[0]}*${ratioSize[1]}`);
+                        }
+                        resolve(isResolutionValid && isRatioValid);
+                    };
+                    img.src = URL.createObjectURL(rawFile);
+                });
+            };
+
+            const checkAspectRatio = (width: number, height: number) => {
+                if (ratioSize[0] <= 0 || ratioSize[1] <= 0) return true;
+                // 检查输入是否为有效的正数
+                if (typeof width !== "number" || typeof height !== "number" || width <= 0 || height <= 0) {
+                    return false;
+                }
+
+                const aspectRatio = width / height;
+
+                const MIN_RATIO = ratioSize[0];
+                const MAX_RATIO = ratioSize[1];
+
+                const isRatioValid = aspectRatio >= MIN_RATIO && aspectRatio <= MAX_RATIO;
+
+                return isRatioValid;
+            };
+
+            // 音频时长校验
+            const validateAudioDuration = async () => {
+                if (minDuration <= 0 || maxDuration <= 0) return true;
+
+                return new Promise<boolean>((resolve) => {
+                    const audio = new Audio(URL.createObjectURL(rawFile));
+                    audio.addEventListener("loadedmetadata", () => {
+                        const duration = audio.duration;
+                        const isValid = duration >= minDuration && duration <= maxDuration;
+                        if (!isValid) {
+                            feedback.msgError(`上传音频时长不能小于${minDuration}秒或大于${maxDuration}秒`);
+                        }
+                        resolve(isValid);
+                    });
+                });
+            };
+
+            // 视频校验
+            const validateVideo = async () => {
+                if (videoMaxWidth <= 0 || videoMinWidth <= 0) return true;
+
+                return new Promise<boolean>((resolve) => {
+                    const video = document.createElement("video");
+                    video.src = URL.createObjectURL(rawFile);
+                    video.muted = true;
+                    video.playsInline = true;
+                    video.preload = "auto";
+                    video.crossOrigin = "anonymous";
+
+                    video.addEventListener("loadedmetadata", () => {
+                        const { videoWidth, videoHeight, duration } = video;
+                        const fileDuration = duration;
+                        const isWidthValid = videoWidth >= videoMinWidth && videoWidth <= videoMaxWidth;
+                        const isHeightValid = videoHeight >= videoMinHeight && videoHeight <= videoMaxHeight;
+                        const isDurationValid = fileDuration >= minDuration && fileDuration <= maxDuration;
+                        if (!isHeightValid) {
+                            feedback.msgError(`上传视频高度不能小于${videoMinHeight}或大于${videoMaxHeight}`);
+                        } else if (!isWidthValid) {
+                            feedback.msgError(`上传视频宽度不能小于${videoMinWidth}或大于${videoMaxWidth}`);
+                        } else if (!isDurationValid) {
+                            feedback.msgError(`上传视频时长不能小于${minDuration}秒或大于${maxDuration}秒`);
+                        }
+                        resolve(isHeightValid && isWidthValid && isDurationValid);
+                    });
+                });
+            };
+
+            // 执行校验
+            if (!validateFileSize()) return false;
+
+            switch (type) {
+                case "image":
+                    return await validateImageSize();
+                case "audio":
+                    return await validateAudioDuration();
+                case "video":
+                    return await validateVideo();
+                default:
+                    return true;
+            }
+        };
+
+        const handleProgress = async (event: any, file: any, fileLists: any[]) => {
+            visible.value = true;
+            fileList.value = toRaw(fileLists);
+            await nextTick();
+            progressDialogRef.value?.open();
+            emit("on-progress", event.percent);
+        };
+
+        const handleSuccess = (response: any, file: any, fileLists: any[]) => {
+            const allSuccess = fileLists.every((item) => item.status == "success");
+            if (allSuccess) {
+                // uploadRefs.value?.clearFiles();
+                visible.value = false;
+                progressDialogRef.value?.close();
+            }
+            emit("change", file);
+            if (response.code == RequestCodeEnum.SUCCESS) {
+                feedback.msgSuccess(response.msg || "上传成功");
+                emit("success", response);
+            }
+            if (response.code == RequestCodeEnum.FAIL) {
+                fileList.value.splice(
+                    fileList.value.findIndex((item: any) => item.raw.uid == file.raw.uid),
+                    1
+                );
+                feedback.msgError(response.msg || "上传失败");
+            }
+        };
+        const handleError = (event: any, file: any) => {
+            feedback.msgError(`${file.name}文件上传失败`);
+            uploadRefs.value?.abort(file);
+            visible.value = false;
+            emit("change", file);
+            emit("error", file);
+        };
+        const handleExceed = (files) => {
+            if (props.limit === 1) {
+                uploadRefs.value.clearFiles();
+                const file = files[0] as UploadRawFile;
+                file.uid = genFileId();
+                uploadRefs.value!.handleStart(file);
+                uploadRefs.value.submit();
+            } else {
+                feedback.msgError(`文件数量上限为${props.limit}个，请重新上传`);
+            }
+        };
+
+        const handleRemove = (file: any) => {
+            fileList.value = fileList.value.filter((item) => item.uid !== file.uid);
+            emit("remove", file);
+        };
+
+        const handleClose = () => {
+            uploadRefs.value?.clearFiles();
+            visible.value = false;
+        };
+
+        // 清除文件
+        const clearFile = () => {
+            uploadRefs.value?.clearFiles();
+            fileList.value = [];
+        };
+
+        const getAccept = computed(() => {
+            if (props.accept) {
+                return props.accept;
+            }
+
+            switch (props.type) {
+                case "image":
+                    return ".jpg,.png,.gif,.jpeg";
+                case "video":
+                    return ".wmv,.avi,.mpg,.mpeg,.3gp,.mov,.mp4,.flv,.rmvb,.mkv";
+                case "audio":
+                    return ".mp3,.wav";
+                default:
+                    return "*";
+            }
+        });
+
+        watch(
+            () => props.type,
+            (newVal) => {
+                action.value = `${getApiUrl()}${getApiPrefix()}/upload/${newVal}`;
+            }
+        );
+        expose({
+            setFileList: (data: any[]) => {
+                fileList.value = data;
+            },
+        });
+
+        return {
+            uploadRefs,
+            progressDialogRef,
+            action,
+            headers,
+            visible,
+            fileList,
+            getAccept,
+            clearFile,
+            beforeUpload,
+            handleProgress,
+            handleSuccess,
+            handleError,
+            handleExceed,
+            handleRemove,
+            handleClose,
+        };
+    },
+});
+</script>
+
+<style lang="scss" scoped>
+.upload {
+    :deep(.el-upload) {
+        width: inherit;
+    }
+}
+.progress-container {
+    width: 100%;
+    max-width: 400px;
+    font-family: sans-serif;
+    margin-bottom: 20px;
+}
+
+.progress-label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: #374151;
+    font-weight: 600;
+}
+
+.progress-track {
+    height: 12px;
+    background-color: #e5e7eb;
+    border-radius: 999px;
+    overflow: hidden; /* 确保进度条不超出圆角 */
+    position: relative;
+}
+
+.progress-fill {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); /* 带有回弹效果的动画 */
+    position: relative;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* 扫光动画，增加高级感 */
+.progress-shimmer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.3) 50%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+</style>

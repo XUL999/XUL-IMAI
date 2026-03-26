@@ -1,0 +1,16 @@
+bin-debug/
+bin-release/
+[Oo]bj/
+[Bb]in/
+
+.settings/
+
+
+*.swf
+*.air
+*.ipa
+*.apk
+
+
+
+/.idea
