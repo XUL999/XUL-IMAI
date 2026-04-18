@@ -1,27 +1,27 @@
 #!/bin/bash
-# XUL-IMAI 同步脚本
-# 用于从 IMAI.WORK 原版拉取更新
+# XUL-AI 同步脚本
+# 用于从上游拉取更新
 
-echo "🔄 XUL-IMAI 同步脚本"
-echo "===================="
+echo "🔄 XUL-AI 同步脚本"
+echo "=================="
 
 # 检查远程仓库
 echo "📡 检查远程仓库..."
 git remote -v
 
-# 拉取原版更新
+# 拉取上游更新
 echo ""
-echo "📥 拉取 IMAI.WORK 原版更新..."
+echo "📥 拉取上游更新..."
 git fetch upstream
 
-# 显示原版更新
+# 显示上游最新提交
 echo ""
-echo "📋 原版最新提交:"
+echo "📋 上游最新提交:"
 git log upstream/master --oneline -5
 
 # 合并更新
 echo ""
-echo "🔀 合并更新到 XUL-IMAI..."
+echo "🔀 合并更新到 XUL-AI..."
 git merge upstream/master
 
 # 解决冲突后推送

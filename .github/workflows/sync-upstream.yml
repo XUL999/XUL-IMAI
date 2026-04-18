@@ -12,14 +12,11 @@ jobs:
       contents: write
 
     steps:
-      - name: Checkout XUL-IMAI
+      - name: Checkout XUL-AI
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: main
-
-      - name: Add Gitee upstream
-        run: git remote add upstream https://gitee.com/imai-work/imaiwork.git
 
       - name: Fetch upstream
         run: git fetch upstream master

@@ -1,8 +1,8 @@
-# XUL-IMAI
+# XUL-AI
 
-**XUL Chain AI Marketing Platform**
+**XUL Chain AI Integration Platform**
 
-基于 IMAI.WORK 构建的 XUL 链版本，集成了区块链技术。
+白标人工智能集成应用，基于开源生态构建的企业级 AI 服务平台。
 
 ## 🌟 特性
 
@@ -29,21 +29,6 @@
 | RPC URL | https://pro.rswl.ai |
 | 区块浏览器 | https://scan.rswl.ai |
 
-## 🔄 保持同步
-
-本项目基于 IMAI.WORK 构建，保持与原版开源同步：
-
-```bash
-# 拉取原版更新
-git fetch upstream
-
-# 合并更新
-git merge upstream/master
-
-# 解决冲突后推送
-git push origin main
-```
-
 ## 📂 目录结构
 
 ```
@@ -57,10 +42,10 @@ git push origin main
 
 ```bash
 # 克隆项目
-git clone https://github.com/XUL999/XUL-IMAI.git
+git clone https://github.com/XUL999/XUL-AI.git
 
-# 参考 IMAI.WORK 文档搭建
-https://yijianshi.feilingspace.cn/wiki/K4VdwEtb7ikiOnkmv2ScIX67nGf
+# 安装依赖
+# 参考项目内文档配置环境
 ```
 
 ## 🔗 相关链接

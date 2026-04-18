@@ -21,7 +21,7 @@
     "compileType": "miniprogram",
     "libVersion": "latest",
     "appid": "wx240aed4afb266747",
-    "projectname": "IMAI",
+    "projectname": "XUL-AI",
     "condition": {
         "search": {
             "current": -1,
