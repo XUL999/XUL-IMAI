@@ -6,20 +6,17 @@ module.exports = {
   paths: {
     sources: "./contracts",
     artifacts: "./artifacts",
+    tests: "./test",
   },
   networks: {
+    hardhat: {
+      chainId: 12309,
+    },
     xul: {
       url: process.env.XUL_RPC_URL || "https://pro.rswl.ai",
       chainId: 12309,
       accounts: process.env.DEPLOYER_PRIVATE_KEY ? [process.env.DEPLOYER_PRIVATE_KEY] : [],
       gasPrice: 100000000,
-    },
-    hardhat: {
-      chainId: 12309,
-      forking: {
-        url: "https://pro.rswl.ai",
-        blockNumber: 932000,
-      },
     },
   },
   solidity: {
