@@ -23,8 +23,8 @@ class AcquireVideoDurationCron extends Command
 
     protected function execute(Input $input, Output $output)
     {
-        //https://test.imai.work/api/sv.mediaMaterial/lists?page_no=1&page_size=20&name&m_type&field&order_by&group_id
-        //https://test.imai.work/api/video/creationRecord?page_no=1&page_size=20&type
+        // https://OLD-SERVER/api/sv.mediaMaterial/lists?page_no=1&page_size=20&name&m_type&field&order_by&group_id
+        // https://OLD-SERVER/api/video/creationRecord?page_no=1&page_size=20&type
         return true;
     }
 }

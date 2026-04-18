@@ -2,7 +2,7 @@
 
 ## 概述
 
-用 `AIService` 替换 `ToolsService`，实现 AI 能力直连各平台，绕过 imai.club 中间商。
+用 `AIService` 替换 `ToolsService`，实现 AI 能力直连各平台，去掉中间商。
 
 ---
 
@@ -140,7 +140,7 @@ INSERT INTO `x_config` (`group`, `key`, `value`, `name`) VALUES
 
 ## 费用对比示例
 
-| 场景 | 走 imai.club | 直连 DeepSeek | 节省 |
+| 场景 | 走 一路。 | 直连 DeepSeek | 节省 |
 |------|-------------|--------------|------|
 | 1000次对话，每次500 tokens | ~¥50/月 | ~¥2.5/月 | **~95%** |
 

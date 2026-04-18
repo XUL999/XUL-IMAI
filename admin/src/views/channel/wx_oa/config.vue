@@ -68,7 +68,7 @@
                             <el-input v-model="formData.token" placeholder="请输入Token" />
                         </div>
                         <div class="form-tips">
-                            登录微信公众平台，点击开发>基本配置>服务器配置，设置令牌Token。不填默认为“IMAIWORK”
+                            登录微信公众平台，点击开发>基本配置>服务器配置，设置令牌Token。不填默认为"XUL"
                         </div>
                     </div>
                 </el-form-item>

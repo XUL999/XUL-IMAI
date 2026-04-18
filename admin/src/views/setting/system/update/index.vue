@@ -154,7 +154,7 @@ const onOuterVisible = (version: any) => {
 };
 
 const downloadUpdate = (version: any) => {
-    window.open(`https://update.imai.work/update/version/${version}.zip`, "_blank");
+    // Update service not yet configured for XUL-AI fork
 };
 
 const confirmUpdate = () => {

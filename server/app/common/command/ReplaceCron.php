@@ -25,8 +25,8 @@ class ReplaceCron extends Command
     {
         $env = file_get_contents(root_path() . '.env');
 
-        if(strpos($env, '[IMAIWORK]') !== false) {
-            $env = str_replace('[IMAIWORK]', '[PROJECT_KEY]', $env);
+        if(strpos($env, '[PROJECT_KEY]') !== false) {
+            $env = str_replace('[PROJECT_KEY]', '[PROJECT_KEY]', $env);
             file_put_contents(root_path() . '.env', $env);
             $output->writeln('cron表达式已替换');
             $id = \app\common\model\Crontab::where('command',  'replace_cron')->value('id');  

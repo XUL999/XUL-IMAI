@@ -681,7 +681,7 @@ class DeviceLogic extends ApiLogic
             'auto_type' => 1,
             'material_title' => '视频发布模拟发布标题',
             'material_type' => 1,
-            'material_url' => 'https://demo.imai.work/uploads/demo/2.mp4',
+            // 'material_url' => ...,
             'poi' => 0,
             'publish_time' => date('Y-m-d H:i:s', time()),
             'task_id' => 0,
@@ -730,9 +730,9 @@ class DeviceLogic extends ApiLogic
             'material_title' => 'XHS图文发布模拟发布标题',
             'material_type' => 2,
             'material_url' => [
-                'https://demo.imai.work/uploads/demo/1.png',
-                'https://demo.imai.work/uploads/demo/2.png',
-                'https://demo.imai.work/uploads/demo/3.png'
+                // 'https://OLD-SERVER/...,
+                // 'https://OLD-SERVER/...,
+                // 'https://OLD-SERVER/...
             ],
             'poi' => 0,
             'publish_time' => date('Y-m-d H:i:s', time()),
@@ -781,7 +781,7 @@ class DeviceLogic extends ApiLogic
             'title' => '👍',
             'type' => 1,
             'list' => [
-                'https://demo.imai.work/uploads/demo/1.mp4',
+                // 'https://OLD-SERVER/...,
             ],
             'taskId' => 0,
             'body' => '👍',
