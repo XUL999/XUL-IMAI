@@ -1,0 +1,16 @@
+{
+  "name": "xul-ai-contracts",
+  "version": "1.0.0",
+  "description": "XUL-AI 智能合约套件 — 确权登记、付费墙、收入分账",
+  "private": true,
+  "scripts": {
+    "compile": "hardhat compile",
+    "deploy:registry": "hardhat run scripts/deploy-content-registry.js --network xul",
+    "test": "hardhat test"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-ethers": "^3.0.0",
+    "dotenv": "^17.4.1",
+    "hardhat": "^2.22.0"
+  }
+}

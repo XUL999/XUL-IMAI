@@ -4,10 +4,16 @@ bin-release/
 [Oo]bj/
 [Bb]in/
 
+# Hardhat
+node_modules/
+artifacts/
+cache/
+.env
+deployments.json
+
 # Other files and folders
 .settings/
-
-# Executables
+/.idea
 *.swf
 *.air
 *.ipa
